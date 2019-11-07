@@ -1,6 +1,10 @@
 # PAW-Toolbox
 PAW Building Automation for Secure Active Directory.
 
+### Don't forget to update the variables file to match with your infrastructure elements
+
+         - variables.ps1
+
 ## Script Content
 This script will create the following items
 
