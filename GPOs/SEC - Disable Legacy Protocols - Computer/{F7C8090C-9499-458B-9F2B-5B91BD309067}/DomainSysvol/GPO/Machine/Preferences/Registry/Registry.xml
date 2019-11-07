@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RegistrySettings clsid="{A3CCFC41-DFDB-43a5-8D26-0FE8B954DA51}"><Registry clsid="{9CD4B2F4-923D-47f5-A062-E897DD1DAD50}" name="UseLogonCredential" status="UseLogonCredential" image="10" changed="2019-09-27 07:33:30" uid="{991A5827-A106-43A5-8923-F66E0EA78276}"><Properties action="C" displayDecimal="1" default="0" hive="HKEY_LOCAL_MACHINE" key="SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest" name="UseLogonCredential" type="REG_DWORD" value="00000000"/></Registry>
+	<Registry clsid="{9CD4B2F4-923D-47f5-A062-E897DD1DAD50}" name="WpadOverride" status="WpadOverride" image="10" changed="2019-09-27 07:36:57" uid="{583F2AC4-9FD9-487B-BBAF-BCFCEDFC5385}"><Properties action="C" displayDecimal="1" default="0" hive="HKEY_CURRENT_USER" key="SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad" name="WpadOverride" type="REG_DWORD" value="00000001"/></Registry>
+</RegistrySettings>
