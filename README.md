@@ -5,6 +5,11 @@ PAW Building Automation for Secure Active Directory.
 
          - variables.ps1
 
+## Script Execution
+Launch the following PowerShell script with administrative rights
+
+         - PAW-Toolbox-Light v0.1.ps1
+
 ## Script Content
 This script will create the following items
 
