@@ -69,4 +69,82 @@ Create GPOs for Hardening AD
   And create an exception for:
   - Cloud Services Admins Security Group
   
- 
+**PAW – Restrict Workstation Logon – Computer**
+- Deny log on as a batch job, Deny log on as a service:
+    
+    For these Security Groups
+    - Enterprise Admins
+    - Domain Admins
+    - Schema Admins
+    - DOMAIN\Administrators
+    - Account Operators
+    - Backup Operators
+    - Print Operators
+    - Server Operators
+    - Domain Controllers
+    - Read-Only Domain Controllers
+    - Group Policy Creators Owners
+    - Cryptographic Operators
+    - Tier 1 Admins
+
+**PAW – Restrict Server Logon – Computer**
+- Deny log on as a batch job, Deny log on as a service, Deny log on locally:
+    
+    For these Security Groups
+    - Enterprise Admins
+    - Domain Admins
+    - Schema Admins
+    - DOMAIN\Administrators
+    - Account Operators
+    - Backup Operators
+    - Print Operators
+    - Server Operators
+    - Domain Controllers
+    - Read-Only Domain Controllers
+    - Group Policy Creators Owners
+    - Cryptographic Operators
+    
+**PAW - RestrictedAdmin Required – Computer**
+- This feature will require the target servers to be running Windows Server 2008 R2 or later and target workstations to be running Windows 7 or later.
+- To use Remote Desktop in RestrictedAdmin mode, open a command prompt and enter the following text: mstsc.exe /RestrictedAdmin
+- Credentials are not stored on the target machine.
+
+**PAW - Credential Guard – Computer**
+- Credential Guard is a new feature of Windows 10 that restricts application access to credentials, preventing credential theft attacks (including Pass-the-Hash)
+- Apply Credential Guard on PAW workstations
+- WMI filter for Windows 10 Operating Systems
+
+**SEC - WS2016 Domain Security Compliance**
+- Set the following Security Settings for all the domain
+    - Account Lockout Policy
+        - Reset account lockout counter after = 15 minutes
+        - Account lockout threshold = 10
+        - Account lockout duration = 15 minutes
+
+    - Password Policy
+        - Enforce password history = 24
+        - Minimum password lenght = 14
+        - Password must meet complexity requirements = Enabled
+        - Minimum password age = 1
+        - Maximum password age = 90
+        - Store passwords using reversible encryption = Disabled
+
+**SEC - WS2016 Domain Controller Security Compliance**
+- Contain several security settings for Windows Server 2016 Domain Controllers coming from Microsoft Security Compliance Manager template
+
+**SEC – Disable Legacy Protocols – Computer**
+- Disable some Legacy Protocols that present a security risk:
+    - WDIGEST
+    - LLMNR
+    - NetBIOS
+    - WPAD
+
+**SEC - Win10 version 1903 – Computer**
+- Contain several security settings for Windows 10 workstation coming from Microsoft Security Compliance Manager template
+    
+**SEC - Win10 version 1809 – Computer**
+- Contain several security settings for Windows 10 workstation coming from Microsoft Security Compliance Manager template
+    
+**SEC - Win10 version 1XXX – Computer**
+- Contain several security settings for Windows 10 workstation coming from Microsoft Security Compliance Manager template
+    
