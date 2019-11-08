@@ -114,7 +114,7 @@ Function Script:ShowMenu {
             ### [PAW] - Create PAW OUs structure ###
             1 {
                 Write-Host "[PAW] - Create PAW OUs structure" -ForegroundColor Cyan
-                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 8 : [PAW] - Create PAW OUs structure"
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 1 : [PAW] - Create PAW OUs structure"
 
                 #Load ADEnvironment.ps1 script
                 try {
@@ -236,7 +236,7 @@ Function Script:ShowMenu {
             ### [PAW] - Create PAW Security Groups ###
             2 {
                 Write-Host "[PAW] - Create PAW Security Groups" -ForegroundColor Cyan
-                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 9 : [PAW] - Create PAW Security Groups"
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 2 : [PAW] - Create PAW Security Groups"
 
                 #Load ADEnvironment.ps1 script
                 try {
@@ -293,7 +293,7 @@ Function Script:ShowMenu {
             ### [PAW] - Set PAW OUs Delegation ###
             3 {
                 Write-Host "[PAW] - Set PAW OUs Delegation" -ForegroundColor Cyan
-                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 10 : [PAW] - Set PAW OUs Delegation"
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 3 : [PAW] - Set PAW OUs Delegation"
 
                 #Load ADEnvironment.ps1 script
                 try {
@@ -523,7 +523,7 @@ Function Script:ShowMenu {
             ### [PAW] - Move Tier 0 Accounts ###
             4 {
                 Write-Host "[PAW] - Move Tier 0 Accounts" -ForegroundColor Cyan
-                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 11 : [PAW] - Move Tier 0 Accounts"
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 4 : [PAW] - Move Tier 0 Accounts"
 
                 ## Variables ##
                 $sDSE = (Get-ADRootDSE).defaultNamingContext
@@ -557,7 +557,7 @@ Function Script:ShowMenu {
             ### [PAW] - Add PAW Users to Security Groups ###
             5 {
                 Write-Host "[PAW] - Add PAW Users to Security Groups" -ForegroundColor Cyan
-                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 12 : [PAW] - Add PAW Users to Security Groups"
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 5 : [PAW] - Add PAW Users to Security Groups"
 
                 ## Variables ##
                 $sDSE = (Get-ADRootDSE).defaultNamingContext
@@ -604,7 +604,7 @@ Function Script:ShowMenu {
             ### [PAW] - Create PAW blank GPOs ###
             6 {
                 Write-Host "[PAW] - Create PAW blank GPOs" -ForegroundColor Cyan
-                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 13 : [PAW] - Create PAW blank GPOs"
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 6 : [PAW] - Create PAW blank GPOs"
 
                 ## Modules ##
                 try {
@@ -725,7 +725,7 @@ Function Script:ShowMenu {
             ### [PAW] - Import PAW GPOs settings ###
             7 {
                 Write-Host "[PAW] - Import PAW GPOs settings" -ForegroundColor Cyan
-                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 14 : [PAW] - Import PAW GPOs settings"
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 7 : [PAW] - Import PAW GPOs settings"
 
                 ## PAW - Configuration - Computer ##
                 # Reset Variables #
@@ -958,7 +958,7 @@ Function Script:ShowMenu {
             ### [AD] - Create AD Hardening GPOs ###
             8 {
                 Write-Host "[AD] - Create AD Hardening GPOs" -ForegroundColor Cyan
-                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 15 : [AD] - Create AD Hardening GPOs"
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 8 : [AD] - Create AD Hardening GPOs"
 
                 ## Modules ##
                 try {
