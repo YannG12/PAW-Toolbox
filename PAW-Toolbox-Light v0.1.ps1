@@ -98,9 +98,10 @@ Function Script:ShowMenu {
                        "`n6)  [PAW] - Create PAW blank GPOs" `
                        "`n7)  [PAW] - Import PAW GPOs settings" `
                        "`n8)  [AD] - Create AD Hardening GPOs" `
-                       "`n9)  Quit"
+                       "`n9)  [AD] - Add Tier 0 Accounts on Protected Users Security Group" `
+                       "`n10)  Quit"
 					 
-			While ( $action -lt 1 -or $action -gt 9) {
+			While ( $action -lt 1 -or $action -gt 10) {
 				try {
 					[int]$action = Read-Host "`nChoice "
 				} catch {
@@ -110,358 +111,416 @@ Function Script:ShowMenu {
 			switch ($action) {
 
             
-            
-        1 {
-            Write-Host "[PAW] - Create PAW OUs structure" -ForegroundColor Cyan
-            Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 8 : [PAW] - Create PAW OUs structure"
+            ### [PAW] - Create PAW OUs structure ###
+            1 {
+                Write-Host "[PAW] - Create PAW OUs structure" -ForegroundColor Cyan
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 8 : [PAW] - Create PAW OUs structure"
 
-            #Load ADEnvironment.ps1 script
-            try {
-                . .\\ADEnvironment.ps1
-                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] ADEnvironment.ps1 script loaded"
-                } catch {
-                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to load ADEnvironment.ps1"
-                }
-
-            #Prerequisites
-            try {
-            Import-Module ServerManager
-            Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] ServerManager Module loaded"
-            } catch {
-                Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to load ServerManager Module"
-            }
-            
-            try {
-            Add-WindowsFeature Gpmc | Out-Null
-            Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] WindowsFeature Gpmc added"
-            } catch {
-                Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to add WindowsFeature Gpmc"
-            }
-
-            try {
-            Import-Module GroupPolicy
-            Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] GroupPolicy Module loaded"
-            } catch {
-                Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to load GroupPolicy Module"
-            }
-
-            #Get current working directory
-            $sLocation = Get-Location
-            $DomainName = (Get-ADDomain).Name
-            $sDSE = (Get-ADRootDSE).defaultNamingContext
-
-            #Creating Top Level OUs
-            try {
-            New-ADOrganizationalUnit -Name "ADMIN" -Path "$sDSE"
-            New-ADOrganizationalUnit -Name "GROUPS" -Path "$sDSE"
-            Write-Host "[SUCCESS] Top Level OUs for PAW created" -ForegroundColor Cyan
-            Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Top Level OUs for PAW created"
-            } catch {
-                Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to create Top Level OUs for PAW"
-            }
-
-                #Creating Sub OUs for Top Level Admin OU
+                #Load ADEnvironment.ps1 script
                 try {
-                New-ADOrganizationalUnit -Name "Tier 0" -Path ("OU=Admin,$sDSE")
-                New-ADOrganizationalUnit -Name "Tier 1" -Path ("OU=Admin,$sDSE")
-                New-ADOrganizationalUnit -Name "Tier 2" -Path ("OU=Admin,$sDSE")
-                Write-Host "[SUCCESS] Sub OUs for Top Level Admin OU created" -ForegroundColor Cyan
-                Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Sub OUs for Top Level Admin OU created"
-                } catch {
-                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to create Sub OUs for Top Level Admin OU"
-                }
+                    . .\\ADEnvironment.ps1
+                        Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] ADEnvironment.ps1 script loaded"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to load ADEnvironment.ps1"
+                    }
 
-                #Creating Sub OUs for Admin\Tier 0 OU
+                #Prerequisites
                 try {
-                New-ADOrganizationalUnit -Name "Accounts" -Path ("OU=Tier 0,OU=Admin,$sDSE")
-                New-ADOrganizationalUnit -Name "Groups" -Path ("OU=Tier 0,OU=Admin,$sDSE")
-                New-ADOrganizationalUnit -Name "Service Accounts" -Path ("OU=Tier 0,OU=Admin,$sDSE")
-                New-ADOrganizationalUnit -Name "Devices" -Path ("OU=Tier 0,OU=Admin,$sDSE")
-                New-ADOrganizationalUnit -Name "Tier 0 Servers" -Path ("OU=Tier 0,OU=Admin,$sDSE")
-                Write-Host "[SUCCESS] Sub OUs for Admin\Tier 0 OU created" -ForegroundColor Cyan
-                Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Sub OUs for Admin\Tier 0 OU created"
+                Import-Module ServerManager
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] ServerManager Module loaded"
                 } catch {
-                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to create Sub OUs for Admin\Tier 0 OU"
+                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to load ServerManager Module"
                 }
-
-                #Creating Sub OUs for Admin\Tier 1 OU
+                
                 try {
-                New-ADOrganizationalUnit -Name "Accounts" -Path ("OU=Tier 1,OU=Admin,$sDSE")
-                New-ADOrganizationalUnit -Name "Groups" -Path ("OU=Tier 1,OU=Admin,$sDSE")
-                New-ADOrganizationalUnit -Name "Service Accounts" -Path ("OU=Tier 1,OU=Admin,$sDSE")
-                New-ADOrganizationalUnit -Name "Devices" -Path ("OU=Tier 1,OU=Admin,$sDSE")
-                Write-Host "[SUCCESS] Sub OUs for Admin\Tier 1 OU created" -ForegroundColor Cyan
-                Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Sub OUs for Admin\Tier 1 OU created"
+                Add-WindowsFeature Gpmc | Out-Null
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] WindowsFeature Gpmc added"
                 } catch {
-                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to create Sub OUs for Admin\Tier 1 OU"
+                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to add WindowsFeature Gpmc"
                 }
 
-                #Creating Sub OUs for Admin\Tier 2 OU
                 try {
-                New-ADOrganizationalUnit -Name "Accounts" -Path ("OU=Tier 2,OU=Admin,$sDSE")
-                New-ADOrganizationalUnit -Name "Groups" -Path ("OU=Tier 2,OU=Admin,$sDSE")
-                New-ADOrganizationalUnit -Name "Service Accounts" -Path ("OU=Tier 2,OU=Admin,$sDSE")
-                New-ADOrganizationalUnit -Name "Devices" -Path ("OU=Tier 2,OU=Admin,$sDSE")
-                Write-Host "[SUCCESS] Sub OUs for Admin\Tier 2 OU created" -ForegroundColor Cyan
-                Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Sub OUs for Admin\Tier 2 OU created"
+                Import-Module GroupPolicy
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] GroupPolicy Module loaded"
                 } catch {
-                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to create Sub OUs for Admin\Tier 2 OU"
-                }
-
-                #Creating Sub OUs for Top Level Groups OU
-                try {
-                New-ADOrganizationalUnit -Name "Security Groups" -Path ("OU=Groups,$sDSE")
-                New-ADOrganizationalUnit -Name "Distribution Groups" -Path ("OU=Groups,$sDSE")
-                New-ADOrganizationalUnit -Name "Contacts" -Path ("OU=Groups,$sDSE")
-                Write-Host "[SUCCESS] Sub OUs for Top Level Groups OU created" -ForegroundColor Cyan
-                Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Sub OUs for Top Level Groups OU created"
-                } catch {
-                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to create Sub OUs for Top Level Groups OU"
-                }
-
-                #Block inheritance for PAW OUs
-                try {
-                Set-GpInheritance -target "OU=Devices,OU=Tier 0,OU=Admin,$sDSE" -IsBlocked Yes | Out-Null
-                Set-GpInheritance -target "OU=Devices,OU=Tier 1,OU=Admin,$sDSE" -IsBlocked Yes | Out-Null
-                Set-GpInheritance -target "OU=Devices,OU=Tier 2,OU=Admin,$sDSE" -IsBlocked Yes | Out-Null
-                Write-Host "[SUCCESS] Block inheritance for PAW OUs on Admin Top Level OU" -ForegroundColor Cyan
-                Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Block inheritance for PAW OUs on Admin Top Level OU"
-                } catch {
-                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to Block inheritance for PAW OUs on Admin Top Level OU"
-                }
-
-        }
-
-
-        2 {
-            Write-Host "[PAW] - Create PAW Security Groups" -ForegroundColor Cyan
-            Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 9 : [PAW] - Create PAW Security Groups"
-
-            #Load ADEnvironment.ps1 script
-            try {
-                . .\\ADEnvironment.ps1
-                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] ADEnvironment.ps1 script loaded"
-                } catch {
-                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to load ADEnvironment.ps1"
-                }
-
-            #Configure Local Variables
-            $sSourceDir = Get-Location
-            $rootDSE = (Get-ADRootDSE).defaultNamingContext
-
-            #Load Security Groups CSV file
-            try {
-                $Groups = Import-Csv $sSourceDir"\Groups.csv"
-                Write-Host "[SUCCESS] Security Groups CSV file loaded" -ForegroundColor Cyan
-                Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Security Groups CSV file loaded"
-            } catch {
-                Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to load Security Groups CSV file"
-            }
-            foreach ($Group in $Groups){
-                $groupName = $Group.Name
-                #$groupOUPrefix = $Group.OU
-                $destOU = $Group.OU + "," + $rootDSE
-                $groupDN = "CN=" + $groupName + "," + $destOU
-                # Check if the target group already is present.
-                $checkForGroup = Test-XADGroupObject $groupDN
-                If (!$checkForGroup)
-                {
-                    # The group is not present, creating group.
-                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[INFO] Creating the group  $Group.Name in $groupDN"
-                    New-ADGroup -Name $Group.Name -SamAccountName $Group.samAccountName -GroupCategory $Group.GroupCategory -GroupScope $Group.GroupScope -DisplayName $Group.DisplayName -Path $destOU -Description $Group.Description
-                    Write-Host "[SUCCESS] $Group.Name in $groupDN created" -ForegroundColor Cyan
-                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] $Group.Name in $groupDN created"
-
-                    If ($Group.Membership -ne ""){
-                        Generate-LogVerbose -level "verbose" -output $LogFile -message "[INFO] Adding $Group.Name to $Group.Membership"
-                        Add-ADPrincipalGroupMembership -Identity $Group.samAccountName -MemberOf $Group.Membership;
-                        Write-Host "[SUCCESS] $Group.Name to $Group.Membership added" -ForegroundColor Cyan
-                        Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] $Group.Name to $Group.Membership added"
-                        }
-                    $error.Clear()
-                } 
-                Else
-                {
-                    Write-Host "[INFO] The group name $Group.Name already exists in the $destOU" -ForegroundColor Cyan
-                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[INFO] The group name $Group.Name already exists in the $destOU"
-                }
-            }  
-    
-        }
-
-
-        3 {
-            Write-Host "[PAW] - Set PAW OUs Delegation" -ForegroundColor Cyan
-            Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 10 : [PAW] - Set PAW OUs Delegation"
-
-            #Load ADEnvironment.ps1 script
-            try {
-                . .\\ADEnvironment.ps1
-                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] ADEnvironment.ps1 script loaded"
-                } catch {
-                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to load ADEnvironment.ps1"
+                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to load GroupPolicy Module"
                 }
 
                 #Get current working directory
                 $sLocation = Get-Location
+                $DomainName = (Get-ADDomain).Name
+                $sDSE = (Get-ADRootDSE).defaultNamingContext
 
-                #Bring up an Active Directory command prompt so we can use this later on in the script
-                Set-Location ad:
-                
-                #Get a reference to the RootDSE of the current domain
-                $rootdse = Get-ADRootDSE
-                
-                #Get a reference to the current domain
-                $domain = Get-ADDomain
-                
-                #Set the Configuration Naming Context
-                $configCN = $rootdse.ConfigurationNamingContext
-                
-                #Set the Schema Naming Context
-                $schemaNC = $rootDSE.SchemaNamingContext
-                
-                #Set the ForestDnsZones Naming Context
-                $forestDnsZonesDN = "DC=ForestDnsZones,"+$rootDSE.RootDomainNamingContext
+                #Creating Top Level OUs
+                try {
+                New-ADOrganizationalUnit -Name "ADMIN" -Path "$sDSE"
+                New-ADOrganizationalUnit -Name "GROUPS" -Path "$sDSE"
+                Write-Host "[SUCCESS] Top Level OUs for PAW created" -ForegroundColor Cyan
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Top Level OUs for PAW created"
+                } catch {
+                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to create Top Level OUs for PAW"
+                }
 
-                #Set the Sites Naming Context
-                $sitesDN = "CN=Sites,"+$configCN
+                    #Creating Sub OUs for Top Level Admin OU
+                    try {
+                    New-ADOrganizationalUnit -Name "Tier 0" -Path ("OU=Admin,$sDSE")
+                    New-ADOrganizationalUnit -Name "Tier 1" -Path ("OU=Admin,$sDSE")
+                    New-ADOrganizationalUnit -Name "Tier 2" -Path ("OU=Admin,$sDSE")
+                    Write-Host "[SUCCESS] Sub OUs for Top Level Admin OU created" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Sub OUs for Top Level Admin OU created"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to create Sub OUs for Top Level Admin OU"
+                    }
 
-                #Create a hashtable to store the GUID value of each schema class and attribute
-                $guidmap = @{}
-                Get-ADObject -SearchBase ($rootdse.SchemaNamingContext) -LDAPFilter `
-                "(schemaidguid=*)" -Properties lDAPDisplayName,schemaIDGUID | 
-                % {$guidmap[$_.lDAPDisplayName]=[System.GUID]$_.schemaIDGUID}
+                    #Creating Sub OUs for Admin\Tier 0 OU
+                    try {
+                    New-ADOrganizationalUnit -Name "Accounts" -Path ("OU=Tier 0,OU=Admin,$sDSE")
+                    New-ADOrganizationalUnit -Name "Groups" -Path ("OU=Tier 0,OU=Admin,$sDSE")
+                    New-ADOrganizationalUnit -Name "Service Accounts" -Path ("OU=Tier 0,OU=Admin,$sDSE")
+                    New-ADOrganizationalUnit -Name "Devices" -Path ("OU=Tier 0,OU=Admin,$sDSE")
+                    New-ADOrganizationalUnit -Name "Tier 0 Servers" -Path ("OU=Tier 0,OU=Admin,$sDSE")
+                    Write-Host "[SUCCESS] Sub OUs for Admin\Tier 0 OU created" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Sub OUs for Admin\Tier 0 OU created"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to create Sub OUs for Admin\Tier 0 OU"
+                    }
 
-                #Create a hashtable to store the GUID value of each extended right in the forest
-                $extendedrightsmap = @{}
-                Get-ADObject -SearchBase ($rootdse.ConfigurationNamingContext) -LDAPFilter `
-                "(&(objectclass=controlAccessRight)(rightsguid=*))" -Properties displayName,rightsGuid | 
-                % {$extendedrightsmap[$_.displayName]=[System.GUID]$_.rightsGuid}
+                    #Creating Sub OUs for Admin\Tier 1 OU
+                    try {
+                    New-ADOrganizationalUnit -Name "Accounts" -Path ("OU=Tier 1,OU=Admin,$sDSE")
+                    New-ADOrganizationalUnit -Name "Groups" -Path ("OU=Tier 1,OU=Admin,$sDSE")
+                    New-ADOrganizationalUnit -Name "Service Accounts" -Path ("OU=Tier 1,OU=Admin,$sDSE")
+                    New-ADOrganizationalUnit -Name "Devices" -Path ("OU=Tier 1,OU=Admin,$sDSE")
+                    Write-Host "[SUCCESS] Sub OUs for Admin\Tier 1 OU created" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Sub OUs for Admin\Tier 1 OU created"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to create Sub OUs for Admin\Tier 1 OU"
+                    }
 
-                # Set variables for Group objects
-                $serviceDeskOperatorsGroup = "ServiceDeskOperators"
-                $workstationMaintenanceGroup = "WorkstationMaintenance"
-                $replicationMaintenanceGroup = "Tier0ReplicationMaintenance"
-                $tier1ServerMaintenanceGroup = "Tier1ServerMaintenance"
-                $PAWAdminsGroup = "PAWMaint"
+                    #Creating Sub OUs for Admin\Tier 2 OU
+                    try {
+                    New-ADOrganizationalUnit -Name "Accounts" -Path ("OU=Tier 2,OU=Admin,$sDSE")
+                    New-ADOrganizationalUnit -Name "Groups" -Path ("OU=Tier 2,OU=Admin,$sDSE")
+                    New-ADOrganizationalUnit -Name "Service Accounts" -Path ("OU=Tier 2,OU=Admin,$sDSE")
+                    New-ADOrganizationalUnit -Name "Devices" -Path ("OU=Tier 2,OU=Admin,$sDSE")
+                    Write-Host "[SUCCESS] Sub OUs for Admin\Tier 2 OU created" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Sub OUs for Admin\Tier 2 OU created"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to create Sub OUs for Admin\Tier 2 OU"
+                    }
 
-                #Get a reference to each of the OU's we want to set permissions on
-                $userAcctsOUDN = Get-ADOrganizationalUnit -Identity ($userAccountsOU+$domain)
-                $workstationsOUDN = Get-ADOrganizationalUnit -Identity ($workstationsOU+$domain)
-                $computerQuarantineOUDN = Get-ADOrganizationalUnit -Identity ($computerQuarantineOU+$domain)
-                $tier1ServersOUDN = Get-ADOrganizationalUnit -Identity ($tier1ServersOU+$domain)
-                $PAWDevicesOUDN = Get-ADOrganizationalUnit -Identity ($PAWDevicesOU+$domain)
+                    #Creating Sub OUs for Top Level Groups OU
+                    try {
+                    New-ADOrganizationalUnit -Name "Security Groups" -Path ("OU=Groups,$sDSE")
+                    New-ADOrganizationalUnit -Name "Distribution Groups" -Path ("OU=Groups,$sDSE")
+                    New-ADOrganizationalUnit -Name "Contacts" -Path ("OU=Groups,$sDSE")
+                    Write-Host "[SUCCESS] Sub OUs for Top Level Groups OU created" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Sub OUs for Top Level Groups OU created"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to create Sub OUs for Top Level Groups OU"
+                    }
 
-                #Get the SID values of each group (principal) we wish to delegate access to
-                #Add-Log -LogEntry("Getting SID values for each group for delegations");
-                $serviceDeskOpsSID = New-Object System.Security.Principal.SecurityIdentifier (Get-ADGroup $serviceDeskOperatorsGroup).SID
-                $workstationMaintSID = New-Object System.Security.Principal.SecurityIdentifier (Get-ADGroup $workstationMaintenanceGroup).SID
-                $replMaintGroupSID = New-Object System.Security.Principal.SecurityIdentifier (Get-ADGroup $replicationMaintenanceGroup).SID
-                $tier1ServerMaintGroupSID = New-Object System.Security.Principal.SecurityIdentifier (Get-ADGroup $tier1ServerMaintenanceGroup).SID
-                $PAWAdminsGroupSID = New-Object System.Security.Principal.SecurityIdentifier (Get-ADGroup $PAWAdminsGroup).SID
+                    #Block inheritance for PAW OUs
+                    try {
+                    Set-GpInheritance -target "OU=Devices,OU=Tier 0,OU=Admin,$sDSE" -IsBlocked Yes | Out-Null
+                    Set-GpInheritance -target "OU=Devices,OU=Tier 1,OU=Admin,$sDSE" -IsBlocked Yes | Out-Null
+                    Set-GpInheritance -target "OU=Devices,OU=Tier 2,OU=Admin,$sDSE" -IsBlocked Yes | Out-Null
+                    Write-Host "[SUCCESS] Block inheritance for PAW OUs on Admin Top Level OU" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Block inheritance for PAW OUs on Admin Top Level OU"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to Block inheritance for PAW OUs on Admin Top Level OU"
+                    }
 
-                #Get a copy of the current DACL on the OU's or Containers
-                #Add-Log -LogEntry("Getting existing Directory ACLs");
-                $userAccountsOUACL = Get-ACL -Path ($userAcctsOUDN);
-                $workstationsOUACL = Get-ACL -Path ($workstationsOUDN);
-                $computerQuarantineACL = Get-ACL -Path ($computerQuarantineOUDN)
-                $topLevelDomainACL = Get-ACL -Path($domain)
-                $configContainerACL = Get-ACL -Path($configCN)
-                $schemaNCACL = Get-ACL -Path($schemaNC)
-                $forestDnsZonesACL = Get-ACL -Path($forestDnsZonesDN)
-                $sitesACL = Get-ACL -Path($sitesDN)
-                $tier1ServersOUACL = Get-ACL -Path ($tier1ServersOUDN)
-                $PAWDevicesOUACL = Get-ACL -Path ($PAWDevicesOUDN)
+            }
 
-                #Set PAW Admins Permissions on Computer objects in the PAW Devices OU
-                #Add-Log -LogEntry("Performing PAW Admins Role Delegations to the Tier 0\Devices OU");
-                $PAWDevicesOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $PAWAdminsGroupSID,"CreateChild,DeleteChild","Allow",$guidmap["computer"],"All"))
-                $PAWDevicesOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $PAWAdminsGroupSID,"ReadProperty","Allow","Descendents",$guidmap["computer"]))
-                $PAWDevicesOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $PAWAdminsGroupSID,"WriteProperty","Allow","Descendents",$guidmap["computer"]))
+            ### [PAW] - Create PAW Security Groups ###
+            2 {
+                Write-Host "[PAW] - Create PAW Security Groups" -ForegroundColor Cyan
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 9 : [PAW] - Create PAW Security Groups"
 
-                #Set Tier 0 Replication Maintenance Permissions within domain
-                #Add-Log -LogEntry("Performing Tier 0 Replication Maintenance Role Delegations");
-                $topLevelDomainACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Manage Replication Topology"],"Descendents"))
-                $topLevelDomainACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes"],"Descendents"))
-                $topLevelDomainACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes All"],"Descendents"))
-                $topLevelDomainACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replication Synchronization"],"Descendents"))
-                $configContainerACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Manage Replication Topology"],"Descendents"))
-                $configContainerACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes"],"Descendents"))
-                $configContainerACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes All"],"Descendents"))
-                $configContainerACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replication Synchronization"],"Descendents"))
-                $configContainerACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Monitor active directory Replication"],"Descendents"))
-                $schemaNCACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Manage Replication Topology"],"Descendents"))
-                $schemaNCACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes"],"Descendents"))
-                $schemaNCACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes All"],"Descendents"))
-                $schemaNCACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replication Synchronization"],"Descendents"))
-                $schemaNCACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Monitor active directory Replication"],"Descendents"))
-                $forestDnsZonesACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Manage Replication Topology"],"Descendents"))
-                $forestDnsZonesACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes"],"Descendents"))
-                $forestDnsZonesACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes All"],"Descendents"))
-                $forestDnsZonesACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replication Synchronization"],"Descendents"))
-                $sitesACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"CreateChild,DeleteChild","Allow"))
-                $sitesACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $replMaintGroupSID,"WriteProperty","Allow"))
+                #Load ADEnvironment.ps1 script
+                try {
+                    . .\\ADEnvironment.ps1
+                        Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] ADEnvironment.ps1 script loaded"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to load ADEnvironment.ps1"
+                    }
 
-                #Set Tier 1 Server Maintenance Permissions on Computer objects in the Tier 1 Servers OU
-                #Add-Log -LogEntry("Performing Tier 1 Server Maintenance Role Delegations to the Tier 1 Servers OU");
-                $tier1ServersOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $tier1ServerMaintGroupSID,"CreateChild,DeleteChild","Allow",$guidmap["computer"],"All"))
-                $tier1ServersOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $tier1ServerMaintGroupSID,"ReadProperty","Allow","Descendents",$guidmap["computer"]))
-                $tier1ServersOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $tier1ServerMaintGroupSID,"WriteProperty","Allow","Descendents",$guidmap["computer"]))
-                $tier1ServersOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $tier1ServerMaintGroupSID,"ReadProperty,WriteProperty","Allow",$guidmap["gplink"],"All"))
-                $tier1ServersOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
-                $tier1ServerMaintGroupSID,"ReadProperty","Allow",$guidmap["gpoptions"],"All"))
+                #Configure Local Variables
+                $sSourceDir = Get-Location
+                $rootDSE = (Get-ADRootDSE).defaultNamingContext
 
-                #Apply the modified DACL to the OU or Containers
-                #Add-Log -LogEntry("Applying all Updated ACLs");
-                Set-ACL -ACLObject $userAccountsOUACL -Path ("AD:\"+($userAcctsOUDN));
-                Set-ACL -ACLObject $workstationsOUACL -Path ("AD:\"+($workstationsOUDN));
-                Set-ACL -ACLObject $computerQuarantineACL -Path ("AD:\"+($computerQuarantineOUDN));
-                Set-ACL -ACLObject $topLevelDomainACL -Path ("AD:\"+($domain));
-                Set-ACL -ACLObject $configContainerACL -Path ("AD:\"+($configCN));
-                Set-ACL -ACLObject $schemaNCACL -Path ("AD:\"+($schemaNC));
-                Set-ACL -ACLObject $forestDnsZonesACL -Path ("AD:\"+($forestDnsZonesDN));
-                Set-ACL -ACLObject $sitesACL -Path ("AD:\"+($sitesDN));
-                Set-ACL -ACLObject $tier1ServersOUACL -Path ("AD:\"+($tier1ServersOUDN));
-                Set-ACL -ACLObject $PAWDevicesOUACL -Path ("AD:"+($PAWDevicesOUDN));
-                #Add-Log -LogEntry("--Completed PAW and DIAD Active Directory Delegations--");
+                #Load Security Groups CSV file
+                try {
+                    $Groups = Import-Csv $sSourceDir"\Groups.csv"
+                    Write-Host "[SUCCESS] Security Groups CSV file loaded" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Security Groups CSV file loaded"
+                } catch {
+                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to load Security Groups CSV file"
+                }
+                foreach ($Group in $Groups){
+                    $groupName = $Group.Name
+                    #$groupOUPrefix = $Group.OU
+                    $destOU = $Group.OU + "," + $rootDSE
+                    $groupDN = "CN=" + $groupName + "," + $destOU
+                    # Check if the target group already is present.
+                    $checkForGroup = Test-XADGroupObject $groupDN
+                    If (!$checkForGroup)
+                    {
+                        # The group is not present, creating group.
+                        Generate-LogVerbose -level "verbose" -output $LogFile -message "[INFO] Creating the group  $Group.Name in $groupDN"
+                        New-ADGroup -Name $Group.Name -SamAccountName $Group.samAccountName -GroupCategory $Group.GroupCategory -GroupScope $Group.GroupScope -DisplayName $Group.DisplayName -Path $destOU -Description $Group.Description
+                        Write-Host "[SUCCESS] $Group.Name in $groupDN created" -ForegroundColor Cyan
+                        Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] $Group.Name in $groupDN created"
 
-                #Return to original working directory
-                Set-Location $sLocation
+                        If ($Group.Membership -ne ""){
+                            Generate-LogVerbose -level "verbose" -output $LogFile -message "[INFO] Adding $Group.Name to $Group.Membership"
+                            Add-ADPrincipalGroupMembership -Identity $Group.samAccountName -MemberOf $Group.Membership;
+                            Write-Host "[SUCCESS] $Group.Name to $Group.Membership added" -ForegroundColor Cyan
+                            Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] $Group.Name to $Group.Membership added"
+                            }
+                        $error.Clear()
+                    } 
+                    Else
+                    {
+                        Write-Host "[INFO] The group name $Group.Name already exists in the $destOU" -ForegroundColor Cyan
+                        Generate-LogVerbose -level "verbose" -output $LogFile -message "[INFO] The group name $Group.Name already exists in the $destOU"
+                    }
+                }  
+        
+            }
+
+            ### [PAW] - Set PAW OUs Delegation ###
+            3 {
+                Write-Host "[PAW] - Set PAW OUs Delegation" -ForegroundColor Cyan
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 10 : [PAW] - Set PAW OUs Delegation"
+
+                #Load ADEnvironment.ps1 script
+                try {
+                    . .\\ADEnvironment.ps1
+                        Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] ADEnvironment.ps1 script loaded"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to load ADEnvironment.ps1"
+                    }
+
+                    #Get current working directory
+                    $sLocation = Get-Location
+
+                    #Bring up an Active Directory command prompt so we can use this later on in the script
+                    Set-Location ad:
+                    
+                    #Get a reference to the RootDSE of the current domain
+                    $rootdse = Get-ADRootDSE
+                    
+                    #Get a reference to the current domain
+                    $domain = Get-ADDomain
+                    
+                    #Set the Configuration Naming Context
+                    $configCN = $rootdse.ConfigurationNamingContext
+                    
+                    #Set the Schema Naming Context
+                    $schemaNC = $rootDSE.SchemaNamingContext
+                    
+                    #Set the ForestDnsZones Naming Context
+                    $forestDnsZonesDN = "DC=ForestDnsZones,"+$rootDSE.RootDomainNamingContext
+
+                    #Set the Sites Naming Context
+                    $sitesDN = "CN=Sites,"+$configCN
+
+                    #Create a hashtable to store the GUID value of each schema class and attribute
+                    try {
+                    $guidmap = @{}
+                    Get-ADObject -SearchBase ($rootdse.SchemaNamingContext) -LDAPFilter `
+                    "(schemaidguid=*)" -Properties lDAPDisplayName,schemaIDGUID | 
+                    % {$guidmap[$_.lDAPDisplayName]=[System.GUID]$_.schemaIDGUID}
+                    Write-Host "[SUCCESS] Create a hashtable to store the GUID value of each schema class and attribute" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Create a hashtable to store the GUID value of each schema class and attribute"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to Create a hashtable to store the GUID value of each schema class and attribute"
+                    }
+
+                    #Create a hashtable to store the GUID value of each extended right in the forest
+                    try {
+                    $extendedrightsmap = @{}
+                    Get-ADObject -SearchBase ($rootdse.ConfigurationNamingContext) -LDAPFilter `
+                    "(&(objectclass=controlAccessRight)(rightsguid=*))" -Properties displayName,rightsGuid | 
+                    % {$extendedrightsmap[$_.displayName]=[System.GUID]$_.rightsGuid}
+                    Write-Host "[SUCCESS] Create a hashtable to store the GUID value of each extended right in the forest" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Create a hashtable to store the GUID value of each extended right in the forest"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to Create a hashtable to store the GUID value of each extended right in the forest"
+                    }
+
+                    # Set variables for Group objects
+                    try {
+                    $serviceDeskOperatorsGroup = "ServiceDeskOperators"
+                    $workstationMaintenanceGroup = "WorkstationMaintenance"
+                    $replicationMaintenanceGroup = "Tier0ReplicationMaintenance"
+                    $tier1ServerMaintenanceGroup = "Tier1ServerMaintenance"
+                    $PAWAdminsGroup = "PAWMaint"
+                    Write-Host "[SUCCESS] Set variables for Group objects" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Set variables for Group objects"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to Set variables for Group objects"
+                    }
+
+                    #Get a reference to each of the OU's we want to set permissions on
+                    try {
+                    $userAcctsOUDN = Get-ADOrganizationalUnit -Identity ($userAccountsOU+$domain)
+                    $workstationsOUDN = Get-ADOrganizationalUnit -Identity ($workstationsOU+$domain)
+                    $computerQuarantineOUDN = Get-ADOrganizationalUnit -Identity ($computerQuarantineOU+$domain)
+                    $tier1ServersOUDN = Get-ADOrganizationalUnit -Identity ($tier1ServersOU+$domain)
+                    $PAWDevicesOUDN = Get-ADOrganizationalUnit -Identity ($PAWDevicesOU+$domain)
+                    Write-Host "[SUCCESS] Get a reference to each of the OU's we want to set permissions on" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Get a reference to each of the OU's we want to set permissions on"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to Get a reference to each of the OU's we want to set permissions on"
+                    }
+
+                    #Get the SID values of each group (principal) we wish to delegate access to
+                    #Add-Log -LogEntry("Getting SID values for each group for delegations");
+                    try {
+                    $serviceDeskOpsSID = New-Object System.Security.Principal.SecurityIdentifier (Get-ADGroup $serviceDeskOperatorsGroup).SID
+                    $workstationMaintSID = New-Object System.Security.Principal.SecurityIdentifier (Get-ADGroup $workstationMaintenanceGroup).SID
+                    $replMaintGroupSID = New-Object System.Security.Principal.SecurityIdentifier (Get-ADGroup $replicationMaintenanceGroup).SID
+                    $tier1ServerMaintGroupSID = New-Object System.Security.Principal.SecurityIdentifier (Get-ADGroup $tier1ServerMaintenanceGroup).SID
+                    $PAWAdminsGroupSID = New-Object System.Security.Principal.SecurityIdentifier (Get-ADGroup $PAWAdminsGroup).SID
+                    Write-Host "[SUCCESS] Get the SID values of each group (principal) we wish to delegate access to" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Get the SID values of each group (principal) we wish to delegate access to"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to Get the SID values of each group (principal) we wish to delegate access to"
+                    }
+
+                    #Get a copy of the current DACL on the OU's or Containers
+                    #Add-Log -LogEntry("Getting existing Directory ACLs");
+                    try {
+                    $userAccountsOUACL = Get-ACL -Path ($userAcctsOUDN);
+                    $workstationsOUACL = Get-ACL -Path ($workstationsOUDN);
+                    $computerQuarantineACL = Get-ACL -Path ($computerQuarantineOUDN)
+                    $topLevelDomainACL = Get-ACL -Path($domain)
+                    $configContainerACL = Get-ACL -Path($configCN)
+                    $schemaNCACL = Get-ACL -Path($schemaNC)
+                    $forestDnsZonesACL = Get-ACL -Path($forestDnsZonesDN)
+                    $sitesACL = Get-ACL -Path($sitesDN)
+                    $tier1ServersOUACL = Get-ACL -Path ($tier1ServersOUDN)
+                    $PAWDevicesOUACL = Get-ACL -Path ($PAWDevicesOUDN)
+                    Write-Host "[SUCCESS] Get a copy of the current DACL on the OU's or Containers" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Get a copy of the current DACL on the OU's or Containers"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to Get a copy of the current DACL on the OU's or Containers"
+                    }
+
+                    #Set PAW Admins Permissions on Computer objects in the PAW Devices OU
+                    #Add-Log -LogEntry("Performing PAW Admins Role Delegations to the Tier 0\Devices OU");
+                    try {
+                    $PAWDevicesOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $PAWAdminsGroupSID,"CreateChild,DeleteChild","Allow",$guidmap["computer"],"All"))
+                    $PAWDevicesOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $PAWAdminsGroupSID,"ReadProperty","Allow","Descendents",$guidmap["computer"]))
+                    $PAWDevicesOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $PAWAdminsGroupSID,"WriteProperty","Allow","Descendents",$guidmap["computer"]))
+                    Write-Host "[SUCCESS] Set PAW Admins Permissions on Computer objects in the PAW Devices OU" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Set PAW Admins Permissions on Computer objects in the PAW Devices OU"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to Set PAW Admins Permissions on Computer objects in the PAW Devices OU"
+                    }
+
+                    #Set Tier 0 Replication Maintenance Permissions within domain
+                    #Add-Log -LogEntry("Performing Tier 0 Replication Maintenance Role Delegations");
+                    try {
+                    $topLevelDomainACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Manage Replication Topology"],"Descendents"))
+                    $topLevelDomainACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes"],"Descendents"))
+                    $topLevelDomainACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes All"],"Descendents"))
+                    $topLevelDomainACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replication Synchronization"],"Descendents"))
+                    $configContainerACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Manage Replication Topology"],"Descendents"))
+                    $configContainerACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes"],"Descendents"))
+                    $configContainerACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes All"],"Descendents"))
+                    $configContainerACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replication Synchronization"],"Descendents"))
+                    $configContainerACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Monitor active directory Replication"],"Descendents"))
+                    $schemaNCACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Manage Replication Topology"],"Descendents"))
+                    $schemaNCACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes"],"Descendents"))
+                    $schemaNCACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes All"],"Descendents"))
+                    $schemaNCACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replication Synchronization"],"Descendents"))
+                    $schemaNCACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Monitor active directory Replication"],"Descendents"))
+                    $forestDnsZonesACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Manage Replication Topology"],"Descendents"))
+                    $forestDnsZonesACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes"],"Descendents"))
+                    $forestDnsZonesACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replicating Directory Changes All"],"Descendents"))
+                    $forestDnsZonesACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"ExtendedRight","Allow",$extendedrightsmap["Replication Synchronization"],"Descendents"))
+                    $sitesACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"CreateChild,DeleteChild","Allow"))
+                    $sitesACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $replMaintGroupSID,"WriteProperty","Allow"))
+                    Write-Host "[SUCCESS] Set Tier 0 Replication Maintenance Permissions within domain" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Set Tier 0 Replication Maintenance Permissions within domain"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to Set Tier 0 Replication Maintenance Permissions within domain"
+                    }
+
+                    #Set Tier 1 Server Maintenance Permissions on Computer objects in the Tier 1 Servers OU
+                    #Add-Log -LogEntry("Performing Tier 1 Server Maintenance Role Delegations to the Tier 1 Servers OU");
+                    try {
+                    $tier1ServersOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $tier1ServerMaintGroupSID,"CreateChild,DeleteChild","Allow",$guidmap["computer"],"All"))
+                    $tier1ServersOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $tier1ServerMaintGroupSID,"ReadProperty","Allow","Descendents",$guidmap["computer"]))
+                    $tier1ServersOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $tier1ServerMaintGroupSID,"WriteProperty","Allow","Descendents",$guidmap["computer"]))
+                    $tier1ServersOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $tier1ServerMaintGroupSID,"ReadProperty,WriteProperty","Allow",$guidmap["gplink"],"All"))
+                    $tier1ServersOUACL.AddAccessRule((New-Object System.DirectoryServices.ActiveDirectoryAccessRule `
+                    $tier1ServerMaintGroupSID,"ReadProperty","Allow",$guidmap["gpoptions"],"All"))
+                    Write-Host "[SUCCESS] Set Tier 1 Server Maintenance Permissions on Computer objects in the Tier 1 Servers OU" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Set Tier 1 Server Maintenance Permissions on Computer objects in the Tier 1 Servers OU"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to Set Tier 1 Server Maintenance Permissions on Computer objects in the Tier 1 Servers OU"
+                    }
+
+                    #Apply the modified DACL to the OU or Containers
+                    #Add-Log -LogEntry("Applying all Updated ACLs");
+                    try {
+                    Set-ACL -ACLObject $userAccountsOUACL -Path ("AD:\"+($userAcctsOUDN));
+                    Set-ACL -ACLObject $workstationsOUACL -Path ("AD:\"+($workstationsOUDN));
+                    Set-ACL -ACLObject $computerQuarantineACL -Path ("AD:\"+($computerQuarantineOUDN));
+                    Set-ACL -ACLObject $topLevelDomainACL -Path ("AD:\"+($domain));
+                    Set-ACL -ACLObject $configContainerACL -Path ("AD:\"+($configCN));
+                    Set-ACL -ACLObject $schemaNCACL -Path ("AD:\"+($schemaNC));
+                    Set-ACL -ACLObject $forestDnsZonesACL -Path ("AD:\"+($forestDnsZonesDN));
+                    Set-ACL -ACLObject $sitesACL -Path ("AD:\"+($sitesDN));
+                    Set-ACL -ACLObject $tier1ServersOUACL -Path ("AD:\"+($tier1ServersOUDN));
+                    Set-ACL -ACLObject $PAWDevicesOUACL -Path ("AD:"+($PAWDevicesOUDN));
+                    #Add-Log -LogEntry("--Completed PAW and DIAD Active Directory Delegations--");
+                    Write-Host "[SUCCESS] Apply the modified DACL to the OU or Containers" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Apply the modified DACL to the OU or Containers"
+                    } catch {
+                        Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to Apply the modified DACL to the OU or Containers"
+                    }
+
+                    #Return to original working directory
+                    Set-Location $sLocation
 
 
 
             }
 
-
-
-
+            ### [PAW] - Move Tier 0 Accounts ###
             4 {
                 Write-Host "[PAW] - Move Tier 0 Accounts" -ForegroundColor Cyan
                 Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 11 : [PAW] - Move Tier 0 Accounts"
@@ -472,19 +531,30 @@ Function Script:ShowMenu {
                 $DomainAdmins = "Domain Admins"
                 $EnterpriseAdmins = "Enterprise Admins"
 
-
+                try {
                 Get-ADGroupMember -Identity $DomainAdmins -Recursive | Get-ADUser | Foreach-Object {
                     Move-ADObject -Identity $_ -TargetPath $destGroup
                     Remove-ADGroupMember -Identity $DomainAdmins -Members $_
+                    Write-Host "[SUCCESS] Domain Admin Account $_ Moved to $destGroup" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Domain Admin Account $_ Moved to $destGroup"
+                    }
+                } catch {
+                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to Move Domain Admin Account $_ to $destGroup"
                 }
 
+                try {
                 Get-ADGroupMember -Identity $EnterpriseAdmins -Recursive | Get-ADUser | Foreach-Object {
                     Move-ADObject -Identity $_ -TargetPath $destGroup
+                    Write-Host "[SUCCESS] Enterprise Admin Account $_ Moved to $destGroup" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Enterprise Admin Account $_ Moved to $destGroup"
+                    }
+                } catch {
+                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to Move Enterprise Admin Account $_ to $destGroup"
                 }
 
             }
 
-
+            ### [PAW] - Add PAW Users to Security Groups ###
             5 {
                 Write-Host "[PAW] - Add PAW Users to Security Groups" -ForegroundColor Cyan
                 Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 12 : [PAW] - Add PAW Users to Security Groups"
@@ -496,13 +566,42 @@ Function Script:ShowMenu {
                 $PAWUsers = ('CN=PAW Users,OU=Groups,OU=Tier 0,OU=ADMIN'+','+$sDSE)
                 $PAWMaintenance = ('CN=PAW Maintenance,OU=Groups,OU=Tier 0,OU=ADMIN'+','+$sDSE)
 
+                # Domain Admin
+                try {
                 Get-ADGroupMember -Identity $DomainAdmins -Recursive | Get-ADUser | Foreach-Object {
                     Add-ADGroupMember -Identity $PAWUsers -Members $_
+                    Write-Host "[SUCCESS] Domain Admin Account $_ Added to $PAWUsers Security Group" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Domain Admin Account $_ Added to $PAWUsers Security Group"
+                    }
+                } catch {
+                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to add Domain Admin Account $_ to $PAWUsers Security Group"
                 }
-                Add-ADGroupMember -Identity $PAWMaintenance -Members ""
+
+                # Enterprise Admin
+                try {
+                Get-ADGroupMember -Identity $EnterpriseAdmins -Recursive | Get-ADUser | Foreach-Object {
+                    Add-ADGroupMember -Identity $PAWUsers -Members $_
+                    Write-Host "[SUCCESS] Enterprise Admin Account $_ Added to $PAWUsers Security Group" -ForegroundColor Cyan
+                    Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Enterprise Admin Account $_ Added to $PAWUsers Security Group"
+                    }
+                } catch {
+                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to add Enterprise Admin Account $_ to $PAWUsers Security Group"
+                }
+
+                # PAWMaintenance User
+                try {
+                Add-ADGroupMember -Identity $PAWMaintenance -Members $PAWMaintenanceUsers
+                Write-Host "[SUCCESS] Account $PAWMaintenanceUsers Added to $PAWMaintenance Security Group" -ForegroundColor Cyan
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Account $PAWMaintenanceUsers Added to $PAWMaintenance Security Group"
+                }
+                catch {
+                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to add $PAWMaintenanceUsers Account to $PAWMaintenance Security Group"
+                }
+
+
             }
 
-
+            ### [PAW] - Create PAW blank GPOs ###
             6 {
                 Write-Host "[PAW] - Create PAW blank GPOs" -ForegroundColor Cyan
                 Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 13 : [PAW] - Create PAW blank GPOs"
@@ -623,7 +722,7 @@ Function Script:ShowMenu {
 
             }
 
-
+            ### [PAW] - Import PAW GPOs settings ###
             7 {
                 Write-Host "[PAW] - Import PAW GPOs settings" -ForegroundColor Cyan
                 Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 14 : [PAW] - Import PAW GPOs settings"
@@ -856,7 +955,7 @@ Function Script:ShowMenu {
 
             }
 
-
+            ### [AD] - Create AD Hardening GPOs ###
             8 {
                 Write-Host "[AD] - Create AD Hardening GPOs" -ForegroundColor Cyan
                 Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 15 : [AD] - Create AD Hardening GPOs"
@@ -946,12 +1045,45 @@ Function Script:ShowMenu {
 
             }
 
+            ### [AD] - Add Tier 0 Accounts on Protected Users Security Group ###
+            9 {
+                Write-Host "[AD] - Add Tier 0 Accounts on Protected Users Security Group" -ForegroundColor Cyan
+                Generate-LogVerbose -level "verbose" -output $LogFile -message "[CHOICE] Option 9 : [AD] - Add Tier 0 Accounts on Protected Users Security Group"
 
+                ## Variables ##
+                $sDSE = (Get-ADRootDSE).defaultNamingContext
+                $destGroup = ""
+                $destGroup = "Protected Users"
+                $DomainAdmins = "Domain Admins"
+                $EnterpriseAdmins = "Enterprise Admins"
 
+                # Domain Admins
+                try {
+                    Get-ADGroupMember -Identity $DomainAdmins -Recursive | Get-ADUser | Foreach-Object {
+                        Add-ADGroupMember -Identity $destGroup -Members $_
+                        Write-Host "[SUCCESS] Domain Admin Account $_ Added to $destGroup Security Group" -ForegroundColor Cyan
+                        Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Domain Admin Account $_ Added to $destGroup Security Group"
+                    }
+                } catch {
+                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to add Domain Admin Account $_ to $destGroup Security Group"
+                }
+
+                # Enterprise Admins
+                try {
+                    Get-ADGroupMember -Identity $EnterpriseAdmins -Recursive | Get-ADUser | Foreach-Object {
+                        Add-ADGroupMember -Identity $destGroup -Members $_
+                        Write-Host "[SUCCESS] Enterprise Admin Account $_ Added to $destGroup Security Group" -ForegroundColor Cyan
+                        Generate-LogVerbose -level "verbose" -output $LogFile -message "[SUCCESS] Enterprise Admin Account $_ Added to $destGroup Security Group"
+                    }
+                } catch {
+                    Generate-LogVerbose -level "error" -output $LogFile -message "[ERROR] Unable to add Enterprise Admin Account $_ to $destGroup Security Group"
+                }
+
+            }
 
         } 
 
-        if ($action -eq 9) {
+        if ($action -eq 10) {
             Generate-LogVerbose -output $LogFile -message "Exiting"
             $restart = $false          
         } else {

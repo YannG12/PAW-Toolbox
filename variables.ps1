@@ -13,6 +13,7 @@ $Tier0Devices = ('OU=Devices,OU=Tier 0,OU=ADMIN'+','+$sDSE)
 $tier1DevicesOU = ('OU=Devices,OU=Tier 1,OU=ADMIN'+','+$sDSE)
 $tier2DevicesOU = ('OU=Devices,OU=Tier 2,OU=ADMIN'+','+$sDSE)
 $PAWDevicesOU = "OU=Devices,OU=Tier 0,OU=Admin,"
+$PAWMaintenanceUsers = ""
 
 ########## GPOs Import Variables ###########
 $Path = "C:\Users\Yann\Desktop\PAW-Toolbox\GPOs\"
