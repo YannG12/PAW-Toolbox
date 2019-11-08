@@ -45,6 +45,10 @@ Import the GPO settings on the PAW GPOs created previously
 
 Create GPOs for Hardening AD
 
+**9. [PAW] - Create PAW OUs structure**
+
+Add each account that is a member of the Domain Admin, Enterprise Admin Security Group to Protected Users Security Group
+
 ## GPOs Content
 
 
